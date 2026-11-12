@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>闲鱼智能助手</title>
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
   <div id="app">
@@ -17,17 +17,17 @@
       <div class="header-right">
         <div class="model-selector">
           <label class="model-label">🤖 模型</label>
-          <select id="model-select" onchange="switchModel(this.value)"></select>
+          <select id="model-select"></select>
         </div>
-        <button class="btn" onclick="showSettingsModal()" id="settings-btn">⚙️ 设置</button>
-        <button class="btn btn-primary" onclick="showCreateModal()">+ 新建任务</button>
+        <button class="btn" data-action="show-settings" id="settings-btn">⚙️ 设置</button>
+        <button class="btn btn-primary" data-action="show-create">+ 新建任务</button>
       </div>
     </header>
 
     <!-- Config Warning Banner -->
     <div class="config-banner" id="config-banner" style="display:none">
       <span>⚠️ AI 尚未配置，请先点击「设置」配置 API 密钥和模型，否则无法使用</span>
-      <button class="btn btn-sm btn-primary" onclick="showSettingsModal()">去配置</button>
+      <button class="btn btn-sm btn-primary" data-action="show-settings">去配置</button>
     </div>
 
     <div class="main-layout">
@@ -52,9 +52,9 @@
 
           <!-- Tab Bar -->
           <div class="tab-bar">
-            <button class="tab active" data-tab="products" onclick="switchTab('products')">商品列表</button>
-            <button class="tab" data-tab="chats" onclick="switchTab('chats')">聊天会话</button>
-            <button class="tab" data-tab="logs" onclick="switchTab('logs')">运行日志</button>
+            <button class="tab active" data-tab="products">商品列表</button>
+            <button class="tab" data-tab="chats">聊天会话</button>
+            <button class="tab" data-tab="logs">运行日志</button>
           </div>
 
           <!-- Products Tab -->
@@ -87,18 +87,18 @@
   </div>
 
   <!-- Settings Modal -->
-  <div class="modal-overlay" id="settings-modal-overlay" onclick="hideSettingsModal()">
-    <div class="modal settings-modal" onclick="event.stopPropagation()">
+  <div class="modal-overlay" id="settings-modal-overlay">
+    <div class="modal settings-modal">
       <div class="modal-header">
         <h2>⚙️ API 设置</h2>
-        <button class="modal-close" onclick="hideSettingsModal()">&times;</button>
+        <button class="modal-close" data-action="hide-settings">&times;</button>
       </div>
       <div class="modal-body">
         <p class="settings-desc">配置 AI 大模型 API，支持所有 OpenAI 兼容接口。配置信息仅保存在本地服务器。</p>
 
         <div class="form-group">
           <label>API 服务商</label>
-          <select id="cfg-provider" onchange="onProviderChange(this.value)">
+          <select id="cfg-provider">
             <option value="">-- 请选择 --</option>
           </select>
         </div>
@@ -113,7 +113,7 @@
           <label>API Key</label>
           <div class="input-with-toggle">
             <input id="cfg-api-key" type="password" placeholder="sk-...">
-            <button class="btn btn-sm toggle-pwd" onclick="toggleApiKeyVisibility()" type="button">👁</button>
+            <button class="btn btn-sm toggle-pwd" data-action="toggle-pwd" type="button">👁</button>
           </div>
         </div>
 
@@ -128,29 +128,29 @@
           <label>自定义模型 ID <span class="hint">（可选，手动输入模型 ID）</span></label>
           <div class="custom-model-input">
             <input id="cfg-custom-model" type="text" placeholder="例如：gpt-4o-mini">
-            <button class="btn btn-sm" onclick="addCustomModel()">添加</button>
+            <button class="btn btn-sm" data-action="add-model">添加</button>
           </div>
           <div id="custom-model-tags" class="custom-model-tags"></div>
         </div>
 
         <div class="settings-test">
-          <button class="btn" onclick="testApiConfig()" id="test-api-btn">🔍 测试连接</button>
+          <button class="btn" data-action="test-api" id="test-api-btn">🔍 测试连接</button>
           <span id="test-result" class="test-result"></span>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn" onclick="hideSettingsModal()">取消</button>
-        <button class="btn btn-primary" onclick="saveSettings()">保存配置</button>
+        <button class="btn" data-action="hide-settings">取消</button>
+        <button class="btn btn-primary" data-action="save-settings">保存配置</button>
       </div>
     </div>
   </div>
 
   <!-- Create Task Modal -->
-  <div class="modal-overlay" id="modal-overlay" onclick="hideCreateModal()">
-    <div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
       <div class="modal-header">
         <h2>新建采购任务</h2>
-        <button class="modal-close" onclick="hideCreateModal()">&times;</button>
+        <button class="modal-close" data-action="hide-create">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -201,7 +201,7 @@
             <label>粗筛 Prompt <span class="hint">（AI根据标题初筛商品时的指令）</span></label>
             <textarea id="f-coarse-prompt" rows="4" class="persona-editor"></textarea>
             <div class="persona-actions">
-              <button type="button" class="btn btn-sm" onclick="resetCoarsePrompt()">恢复默认</button>
+              <button type="button" class="btn btn-sm" data-action="reset-coarse">恢复默认</button>
             </div>
           </div>
 
@@ -209,7 +209,7 @@
             <label>细筛 Prompt <span class="hint">（AI根据详情页深度筛选时的指令）</span></label>
             <textarea id="f-fine-prompt" rows="4" class="persona-editor"></textarea>
             <div class="persona-actions">
-              <button type="button" class="btn btn-sm" onclick="resetFinePrompt()">恢复默认</button>
+              <button type="button" class="btn btn-sm" data-action="reset-fine">恢复默认</button>
             </div>
           </div>
 
@@ -217,25 +217,25 @@
             <label>聊天人设 <span class="hint">（AI与卖家沟通时扮演的角色、语气、规则）</span></label>
             <textarea id="f-persona" rows="10" class="persona-editor"></textarea>
             <div class="persona-actions">
-              <button type="button" class="btn btn-sm" onclick="resetPersona()">恢复默认人设</button>
+              <button type="button" class="btn btn-sm" data-action="reset-persona">恢复默认人设</button>
               <span class="hint" id="persona-hint">留空则使用默认人设</span>
             </div>
           </div>
         </details>
       </div>
       <div class="modal-footer">
-        <button class="btn" onclick="hideCreateModal()">取消</button>
-        <button class="btn btn-primary" onclick="createTask()">创建并启动</button>
+        <button class="btn" data-action="hide-create">取消</button>
+        <button class="btn btn-primary" data-action="create-task">创建并启动</button>
       </div>
     </div>
   </div>
 
   <!-- Start Task Modal (edit persona & strategy before restart) -->
-  <div class="modal-overlay" id="start-modal-overlay" onclick="hideStartModal()">
-    <div class="modal" style="max-width:560px" onclick="event.stopPropagation()">
+  <div class="modal-overlay" id="start-modal-overlay">
+    <div class="modal" style="max-width:560px">
       <div class="modal-header">
         <h2>启动任务</h2>
-        <button class="modal-close" onclick="hideStartModal()">&times;</button>
+        <button class="modal-close" data-action="hide-start">&times;</button>
       </div>
       <div class="modal-body">
         <p class="hint" style="margin-bottom:12px" id="start-modal-task-name"></p>
@@ -249,12 +249,12 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn" onclick="hideStartModal()">取消</button>
-        <button class="btn btn-primary" onclick="confirmStartTask()">确认启动</button>
+        <button class="btn" data-action="hide-start">取消</button>
+        <button class="btn btn-primary" data-action="confirm-start">确认启动</button>
       </div>
     </div>
   </div>
 
-  <script src="app.js?v=8"></script>
+  <script type="module" src="js/main.js?v=9"></script>
 </body>
 </html>
