@@ -14,6 +14,9 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
+// 默认只监听本机，避免局域网/公网下任务数据、配置、聊天被他人访问。
+// 如确需局域网访问，设置 HOST=0.0.0.0（自担风险）。
+const HOST = process.env.HOST || '127.0.0.1';
 
 const app = express();
 const server = createServer(app);
@@ -124,7 +127,9 @@ app.post('/api/tasks', (req, res) => {
     return res.status(400).json({ error: '请先在设置中配置 AI API' });
   }
   const task = taskManager.createTask(req.body);
-  taskManager.startTask(task.id);
+  taskManager.startTask(task.id).catch(err => {
+    console.error(`任务 ${task.id} 启动异常:`, err.message);
+  });
   res.json(task);
 });
 
@@ -137,7 +142,9 @@ app.post('/api/tasks/:id/start', (req, res) => {
   const updates = {};
   if (req.body.chatStrategy !== undefined) updates.chatStrategy = req.body.chatStrategy;
   if (req.body.persona !== undefined) updates.persona = req.body.persona;
-  taskManager.startTask(req.params.id, updates);
+  taskManager.startTask(req.params.id, updates).catch(err => {
+    console.error(`任务 ${req.params.id} 启动异常:`, err.message);
+  });
   res.json({ ok: true });
 });
 
@@ -181,9 +188,13 @@ app.post('/api/model', (req, res) => {
   res.json({ ok: true, current: getCurrentModel() });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   const configured = isConfigured();
-  console.log(`🚀 闲鱼智能助手已启动: http://localhost:${PORT}`);
+  const shownHost = HOST === '0.0.0.0' ? '局域网可访问' : 'localhost';
+  console.log(`🚀 闲鱼智能助手已启动: http://localhost:${PORT} (${shownHost})`);
+  if (HOST === '0.0.0.0') {
+    console.log(`⚠️  已绑定 0.0.0.0，局域网内任何人都能访问你的任务与配置，请谨慎`);
+  }
   if (!configured) {
     console.log(`⚠️  AI 尚未配置，请打开浏览器进入设置页面配置 API 密钥`);
   }
